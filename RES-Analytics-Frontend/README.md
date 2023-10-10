@@ -1,8 +1,12 @@
 ## Before running the project
--> . env/bin/activate
-Come back here if the project isn't running after the "Getting Started" step:
--> npm install -g npm
--> npm install
+-> . env/bin/activate  
+
+Come back here if the project isn't running after the "Getting Started" step:  
+
+-> npm install -g npm  
+
+-> npm install  
+
 
 ## Getting Started
 
