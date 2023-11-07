@@ -16,7 +16,7 @@ function fetchData(endPoint, setDict) {
         var tempJsonDict = {}
 
         for (var i = 0; i < result.length; i++) {
-          tempJsonDict[result[i].question_fk.id] = result[i];
+          tempJsonDict[result[i].id] = result[i];
         }
 
         setDict(tempJsonDict)

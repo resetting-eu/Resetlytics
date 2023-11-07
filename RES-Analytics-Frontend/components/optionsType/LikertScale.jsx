@@ -25,7 +25,7 @@ export default function LikertScale({ isAuthenticated, info }) {
             textDecoration: 'none',
           }}
         >
-          {info.question_fk.item_code} - {info.question_fk.text}
+          {info.item_code} - {info.text}
 
           {isAuthenticated ?
             <>
@@ -40,7 +40,7 @@ export default function LikertScale({ isAuthenticated, info }) {
                   fontWeight: 600,
                   color: 'black',
                   textDecoration: 'none',
-                }} display='inline'>{info.answer}% </Box> and the most popular answer was
+                }} display='inline'>{info.answers}% </Box> and the most popular answer was
                 <Box sx={{
                   fontFamily: 'inter',
                   fontStyle: 'italic',
@@ -48,7 +48,7 @@ export default function LikertScale({ isAuthenticated, info }) {
                   fontWeight: 600,
                   color: 'black',
                   textDecoration: 'none',
-                }} display='inline'>{info.perc}% </Box>.
+                }} display='inline'>{info.majority_answer.majority_percentage}% </Box>.
               </Box>
             </>
             :
@@ -69,7 +69,7 @@ export default function LikertScale({ isAuthenticated, info }) {
                 fontWeight: 600,
                 color: 'black',
                 textDecoration: 'none',
-              }} display='inline'> {info.answer} </Box>.
+              }} display='inline'> {info.majority_answer.majority_choice_text} </Box>.
 
             </>
           }

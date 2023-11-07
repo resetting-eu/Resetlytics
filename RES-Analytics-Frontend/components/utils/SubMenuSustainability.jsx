@@ -38,15 +38,15 @@ CustomTabPanel.propTypes = {
 
 function selectOptionType(isAuthenticated, info, value, index) {
 
-  if (info.question_fk.type == 'Multiple Choice') {
+  if (info.type == 'multiple') {
     return (<CustomTabPanel value={value} index={index} >
       <MutipleChoice isAuthenticated={isAuthenticated} info={info} />
     </CustomTabPanel>)
-  } else if (info.question_fk.type == 'Likert Scale') {
+  } else if (info.type == 'likert') {
     return (<CustomTabPanel value={value} index={index} >
       <LikertScale isAuthenticated={isAuthenticated} info={info} />
     </CustomTabPanel>)
-  } else if (info.question_fk.type == 'Text Entry') {
+  } else if (info.type == 'text') {
     return (<CustomTabPanel value={value} index={index} >
       <TextEntry isAuthenticated={isAuthenticated} info={info} />
     </CustomTabPanel>)
@@ -97,13 +97,14 @@ export default function BasicTabs({dict, isAuthenticated}) {
 
       {
         Object.keys(dict).map(function (key) {
-          if (dict[key].question_fk.dimension == "Enterprise  Management") {
+          console.log(dict[key])
+          if (dict[key].dimension == "Enterprise  Management") {
             return selectOptionType(isAuthenticated, dict[key], value, 0)
-          } else if (dict[key].question_fk.dimension == "Economic Value") {
+          } else if (dict[key].dimension == "Economic Value") {
             return selectOptionType(isAuthenticated, dict[key], value, 1)
-          } else if (dict[key].question_fk.dimension == "Social and Cultural Impact") {
+          } else if (dict[key].dimension == "Social and Cultural Impact") {
             return selectOptionType(isAuthenticated, dict[key], value, 2)
-          } else if (dict[key].question_fk.dimension == "Environmental Impact") {
+          } else if (dict[key].dimension == "Environmental Impact") {
             return selectOptionType(isAuthenticated, dict[key], value, 3)
           }
         })}

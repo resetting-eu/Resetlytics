@@ -25,7 +25,7 @@ export default function MultipleChoice({ isAuthenticated, info }) {
             textDecoration: 'none',
           }}
         >
-          {info.question_fk.item_code} - {info.question_fk.text}
+          {info.item_code} - {info.text}
 
           {isAuthenticated ?
             <>
@@ -40,7 +40,7 @@ export default function MultipleChoice({ isAuthenticated, info }) {
                   fontWeight: 600,
                   color: 'black',
                   textDecoration: 'none',
-                }} display='inline'>{info.answer}% </Box> which was the answer of
+                }} display='inline'>{info.answers}% </Box> which was the answer of
                 <Box sx={{
                   fontFamily: 'inter',
                   fontStyle: 'italic',
@@ -48,7 +48,7 @@ export default function MultipleChoice({ isAuthenticated, info }) {
                   fontWeight: 600,
                   color: 'black',
                   textDecoration: 'none',
-                }} display='inline'>{info.perc}% </Box> other enterprises.
+                }} display='inline'>{info.majority_answer.majority_percentage}% </Box> other enterprises.
               </Box>
             </>
             :
@@ -69,7 +69,7 @@ export default function MultipleChoice({ isAuthenticated, info }) {
                 fontWeight: 600,
                 color: 'black',
                 textDecoration: 'none',
-              }} display='inline'> {info.answer} </Box>.
+              }} display='inline'> {info.majority_answer.majority_choice_text} </Box>.
 
             </>
           }
