@@ -11,6 +11,7 @@ import {
     Tooltip,
     Legend,
     TimeScale,
+    Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import dayjs from 'dayjs';
@@ -30,7 +31,8 @@ Chart.register(
     TimeScale,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    Filler
 );
 
 function lineOptionsFunction(startDateZoom, endDateZoom) {
@@ -82,12 +84,11 @@ function lineOptionsFunction(startDateZoom, endDateZoom) {
                 },
                 type: 'time',
                 time: {
-                    parser: 'YYYY-MM-DD',
+                    parser: 'YYYY-MM',
                     displayFormats: {
                         month: 'YYYY-MM',
-                        day: 'YYYY-MM-DD',
                     },
-                    tooltipFormat: 'YYYY-MM-DD'
+                    tooltipFormat: 'YYYY-MM'
                 }
             },
         },
@@ -101,8 +102,34 @@ function createDataset(model, valueList) {
     const dataset = {
         label: model.timeseries_name,
         data: valueList,
-        borderColor: 'rgb(66, 179, 193)',
-        backgroundColor: 'rgb(66, 179, 193, 0.5)',
+        borderColor: 'rgb(0, 0, 0)',
+        backgroundColor: 'rgb(0, 0, 0, 0.5)',
+    }
+
+    return dataset
+}
+
+function createDatasetPredictions(model, valueList) {
+
+    const dataset = {
+        label: model.timeseries_name,
+        data: valueList,
+        borderColor: 'rgb(0, 255, 0)',
+        backgroundColor: 'rgb(0, 255, 0, 0.5)',
+
+    }
+
+    return dataset
+}
+
+function createDatasetPredictionsCone(model, valueList) {
+
+    const dataset = {
+        label: model.timeseries_name,
+        data: valueList,
+        fill: '+1',
+        borderColor: 'rgb(0, 255, 0, 0.3)',
+        backgroundColor: 'rgb(0, 255, 0, 0.3)',
     }
 
     return dataset
@@ -110,7 +137,7 @@ function createDataset(model, valueList) {
 
 export default function Page() {
 
-    const format = 'YYYY-MM-DD';
+    const format = 'YYYY-MM';
     const timeseriesName = 'devtests'
 
     const [primaryLabels, setPrimaryLabels] = React.useState({});
@@ -148,17 +175,37 @@ export default function Page() {
                 return fetch('https://nmcao11.pythonanywhere.com/models/' + id,)
                     .then(response => response.json())
                     .then(data => {
-                        const dateList = data.map((item) => item.date)
-                        const valueList = data.map((item) => item.value)
+                        const dateList = data.map((item) => item.date).slice(120)
+                        const valueList = data.map((item) => item.value).slice(120)
+
+                        const actualList = valueList.slice(0, -12)
+                        const predList = valueList.fill(null, 0, valueList.length - 12)
+                        const predListUp = []
+                        const predListDown = []
+                        var j = 0
+                        
+                        for (var i = 0; i < predList.length; i++) {
+
+                            if (predList[i] == null) {
+                                predListUp[i] = null
+                                predListDown[i] = null
+                                continue
+                            } 
+                            predListUp[i] = predList[i] + j * 0.03
+                            predListDown[i] = predList[i] - j * 0.03
+                            j++
+                        }
 
                         console.log(dateList)
                         console.log(valueList)
 
                         setPrimaryLabels(dateList)
-                        setPrimaryDatasets([createDataset('devtest', valueList)])
+                        setPrimaryDatasets([createDataset('devtest', actualList), createDatasetPredictions('devtest', predList),
+                         createDatasetPredictionsCone('devtests', predListUp), createDatasetPredictionsCone('devtests', predListDown)])
 
                         tempLabels = dateList
-                        tempDatasets = [createDataset('devtest', valueList)]
+                        tempDatasets = [createDataset('devtest', actualList), createDatasetPredictions('devtest', predList),
+                        createDatasetPredictionsCone('devtests', predListUp), createDatasetPredictionsCone('devtests', predListDown)]
 
                         setStartDate(dayjs(String(dateList.slice(0, 1))))
                         setEndDate(dayjs(String(dateList.slice(-1))))
@@ -250,6 +297,3 @@ export default function Page() {
 
     )
 }
-
-
-
