@@ -45,7 +45,7 @@ export default function Input({
 			<div >
 				<input
 					id={labelId}
-					className='block w-full rounded-md border-0 py-1.5 text-res_blue shadow-sm ring-1 ring-inset ring-res_blue placeholder:text-res_blue focus:ring-2 focus:ring-inset focus:ring-res_blue sm:text-sm sm:leading-6'
+					className='block w-full rounded-md border-0 px-1.5 py-1.5 text-res_blue shadow-sm ring-1 ring-res_blue placeholder:text-res_blue focus:ring-2 focus:ring-black sm:text-sm sm:leading-6'
 					name={labelId}
 					type={type}
 					onChange={onChange}
