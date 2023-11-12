@@ -21,6 +21,7 @@ import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 
 import Filter from '@components/filters/TourismForecast';
 import Spinner from '@components/common/Spinner';
+
 import { FORECAST_ENDPOINT } from 'endpoints.js'
 
 Chart.register(
@@ -65,7 +66,7 @@ function lineOptionsFunction(startDateZoom, endDateZoom) {
                     bottom: 30
                 }
             },
-
+            
 
         },
         scales: {
@@ -162,47 +163,72 @@ export default function Page() {
 
         setIsLoading(true)
 
-        fetch(FORECAST_ENDPOINT, { cache: "no-store" })
+        fetch(FORECAST_ENDPOINT)
             .then(response => response.json())
             .then(data => {
-                var result = JSON.parse(JSON.stringify(data))
-                
-                const dateList = result.timeseries.map((item) => item.date)
-                const valueList = result.timeseries.map((item) => [item.type, item.value])
-                
-                const actualList = valueList.filter((item) => item[0] == 'historic').map((item) => item[1])
-
-                const predList = valueList.fill(null, 0, actualList.length).filter((item) => item == null || item[0] == 'pred').map(function(item){
-                    if(item == null){ return null } else { return item[1] } })
-                const predListUp = valueList.fill(null, 0, actualList.length).filter((item) => item == null || item[0] == 'upper_cone').map(function(item){
-                    if(item == null){ return null } else { return item[1] } })
-                const predListDown = valueList.fill(null, 0, actualList.length).filter((item) => item == null || item[0] == 'lower_cone').map(function(item){
-                    if(item == null){ return null } else { return item[1] } })
-
-                setPrimaryLabels(dateList)
-                setPrimaryDatasets([createDataset('devtest', actualList), createDatasetPredictions('devtest', predList),
-                createDatasetPredictionsCone('devtests', predListUp), createDatasetPredictionsCone('devtests', predListDown)])
-
-                tempLabels = dateList
-                tempDatasets = [createDataset('devtest', actualList), createDatasetPredictions('devtest', predList),
-                createDatasetPredictionsCone('devtests', predListUp), createDatasetPredictionsCone('devtests', predListDown)]
-
-                setStartDate(dayjs(String(dateList.slice(0, 1))))
-                setEndDate(dayjs(String(dateList.slice(-1))))
-
-                setTempStartDate(dayjs(String(dateList.slice(0, 1))))
-                setTempEndDate(dayjs(String(dateList.slice(-1))))
-
-                setLabelsList(tempDatasets.map(item => { return item.label }))
-                setTempLabelsList(tempDatasets.map(item => { return item.label }))
-
-                setState({
-                    labels: tempLabels,
-                    datasets: tempDatasets
+                var id;
+                const model = data.filter((item) => {
+                    if (item.timeseries_name == timeseriesName) {
+                        return item
+                    }
                 })
+                id = model[0].id
 
-                setIsLoading(false)
+                return fetch('https://nmcao11.pythonanywhere.com/models/' + id,)
+                    .then(response => response.json())
+                    .then(data => {
+                        const dateList = data.map((item) => item.date).slice(120)
+                        const valueList = data.map((item) => item.value).slice(120)
+
+                        const actualList = valueList.slice(0, -12)
+                        const predList = valueList.fill(null, 0, valueList.length - 12)
+                        const predListUp = []
+                        const predListDown = []
+                        var j = 0
+                        
+                        for (var i = 0; i < predList.length; i++) {
+
+                            if (predList[i] == null) {
+                                predListUp[i] = null
+                                predListDown[i] = null
+                                continue
+                            } 
+                            predListUp[i] = predList[i] + j * 0.03
+                            predListDown[i] = predList[i] - j * 0.03
+                            j++
+                        }
+
+                        console.log(dateList)
+                        console.log(valueList)
+
+                        setPrimaryLabels(dateList)
+                        setPrimaryDatasets([createDataset('devtest', actualList), createDatasetPredictions('devtest', predList),
+                         createDatasetPredictionsCone('devtests', predListUp), createDatasetPredictionsCone('devtests', predListDown)])
+
+                        tempLabels = dateList
+                        tempDatasets = [createDataset('devtest', actualList), createDatasetPredictions('devtest', predList),
+                        createDatasetPredictionsCone('devtests', predListUp), createDatasetPredictionsCone('devtests', predListDown)]
+
+                        setStartDate(dayjs(String(dateList.slice(0, 1))))
+                        setEndDate(dayjs(String(dateList.slice(-1))))
+
+                        setTempStartDate(dayjs(String(dateList.slice(0, 1))))
+                        setTempEndDate(dayjs(String(dateList.slice(-1))))
+
+                        setLabelsList(tempDatasets.map(item => { return item.label }))
+                        setTempLabelsList(tempDatasets.map(item => { return item.label }))
+
+                        setState({
+                            labels: tempLabels,
+                            datasets: tempDatasets
+                        })
+
+                        setIsLoading(false)
+                    })
             })
+
+
+
     }, [])
 
     if (isLoading) {
@@ -251,24 +277,24 @@ export default function Page() {
                 Tourist Arrivals Predictions
             </Typography>
 
-            <Filter
-                tempStartDate={tempStartDate}
-                tempEndDate={tempEndDate}
-                setTempStartDate={setTempStartDate}
-                setTempEndDate={setTempEndDate}
-                handleUpdate={handleUpdate}
-                handleReset={handleReset}
-                startDate={startDate}
-                endDate={endDate}
-                labelsList={labelsList}
-                tempLabelsList={tempLabelsList}
-                setTempLabelsList={setTempLabelsList}
-            />
+                <Filter
+                    tempStartDate={tempStartDate}
+                    tempEndDate={tempEndDate}
+                    setTempStartDate={setTempStartDate}
+                    setTempEndDate={setTempEndDate}
+                    handleUpdate={handleUpdate}
+                    handleReset={handleReset}
+                    startDate={startDate}
+                    endDate={endDate}
+                    labelsList={labelsList}
+                    tempLabelsList={tempLabelsList}
+                    setTempLabelsList={setTempLabelsList}
+                />
 
 
-            <Box height='70vh' display='flex' justifyContent="center" >
-                <Line options={lineOptionsFunction()} data={state} redraw={true} />
-            </Box>
+                <Box height='70vh' display='flex' justifyContent="center" >
+                    <Line options={lineOptionsFunction()} data={state} redraw={true} />
+                </Box>
         </Container>
 
     )

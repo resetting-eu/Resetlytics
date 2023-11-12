@@ -8,6 +8,8 @@ import Spinner from '@components/common/Spinner';
 import dayjs from 'dayjs';
 import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import { TagCloud } from 'react-tagcloud'
+import { SENTIMENT_ANALYSIS_ENDPOINT, WORDCLOUD_ENDPOINT } from 'endpoints.js'
+
 
 
 import {
@@ -223,8 +225,8 @@ export default function Page() {
     var tempDatasets = []
 
     // endpoints
-    var endPointSA = 'https://nmcao11.pythonanywhere.com/sa'
-    var endPointWordCloud = 'https://nmcao11.pythonanywhere.com/wordcloud'
+    var endPointSA = SENTIMENT_ANALYSIS_ENDPOINT
+    var endPointWordCloud = WORDCLOUD_ENDPOINT
 
     // dates
     const [startDate, setStartDate] = React.useState(null);

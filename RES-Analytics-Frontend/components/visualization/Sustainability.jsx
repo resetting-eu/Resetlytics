@@ -4,6 +4,7 @@ import { Grid, Container, Button, Typography } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { useRetrieveUserQuery } from '@/redux/features/authApiSlice';
 import SubMenuSustainability from '@components/utils/SubMenuSustainability'
+import { SUSTAINABILITY_ENDPOINT } from 'endpoints.js'
 
 
 function fetchData(endPoint, setDict) {
@@ -26,10 +27,9 @@ function fetchData(endPoint, setDict) {
 }
 
 export default function Sustainability() {
-
   const [dict, setDict] = useState({})
 
-  const [endPoint, setendPoint] = useState('https://nmcao11.pythonanywhere.com/api/sustainability/')
+  const [endPoint, setendPoint] = useState(SUSTAINABILITY_ENDPOINT)
 
   const { data: user } = useRetrieveUserQuery();
   const { isAuthenticated } = useAppSelector(state => state.auth);
