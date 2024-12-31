@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-import sys
-import dj_database_url
+#import sys
+#import dj_database_url
 from os import getenv, path
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
@@ -27,16 +27,25 @@ if path.isfile(dotenv_file):
 
 DEVELOPMENT_MODE = getenv('DEVELOPMENT_MODE', 'False') == 'True'
 
+if DEVELOPMENT_MODE is True:
+    dotenv_file = BASE_DIR / '.env.dev'
+else:
+    dotenv_file = BASE_DIR / '.env.prod'
+if path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+# manage.py check --deploy
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = getenv('DJANGO_SECRET_ENV', get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don't run with debug turned on in production
 DEBUG = getenv('DEBUG', 'FALSE') == 'True'
 
-ALLOWED_HOSTS = getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = getenv('DJANGO_ALLOWED_HOSTS').split(",")
+WEBSITE_URL = getenv('WEBSITE_URL')
 
 # Application definition
 
@@ -46,21 +55,21 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     # own
     "app.apps.AppConfig",
     "user.apps.UserConfig",
     # third-party
-    # "debug_toolbar", # only for DEV <<<<<<<<<<<<<<<<<<
     "corsheaders",
     "djoser",
     'rest_framework',
-    'storages',
-
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",   
     "django.middleware.common.CommonMiddleware",
@@ -91,9 +100,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'resetlytics.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
         'default': {
@@ -107,25 +114,21 @@ DATABASES = {
 }
   
 # DATABASES = {"default": env.db()}
+# DATABASES = {"default": env.dj_db_url("DATABASE_URL")} dj_database_url
+# DATABASE_URL = 'django.db.backends.mysql'
 
 # Email settings
 
-EMAIL_BACKEND = 'django_ses.SESBackend'
-DEFAULT_FROM_EMAIL = getenv('AWS_SES_FROM_EMAIL')
+EMAIL_BACKEND = 'django_ses.SESBackend' 
+# 'django.core.mail.backends.smtp.EmailBackend'
+# DEFAULT_FROM_EMAIL = getenv('AWS_SES_FROM_EMAIL')
+# EMAIL_BACKED = "django.core.mail.backends.console.EmailBackend"
+# others ...
 
-AWS_SES_ACCESS_KEY_ID = getenv('AWS_SES_ACCESS_KEY_ID')
-AWS_SES_SECRET_ACCESS_KEY = getenv('AWS_SES_SECRET_ACCESS_KEY')
-AWS_SES_REGION_NAME = getenv('AWS_SES_REGION_NAME')
-AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
-AWS_SES_FROM_EMAIL = getenv('AWS_SES_FROM_EMAIL')
-USE_SES_V2 = True
-
-DOMAIN = getenv('DOMAIN')
-SITE_NAME = 'Resetlytics'
-
+#DOMAIN = getenv('DOMAIN')
+#SITE_NAME = 'Resetlytics'
 
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -143,7 +146,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-GB"
 TIME_ZONE = "UTC"
@@ -151,33 +153,27 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+STATIC_URL = "static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
-if DEVELOPMENT_MODE is True:
-    STATIC_URL = 'static/'
-    STATIC_ROOT = BASE_DIR / 'static'
-    MEDIA_URL = 'media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
-else:
-    AWS_S3_ACCESS_KEY_ID = getenv('AWS_S3_ACCESS_KEY_ID')
-    AWS_S3_SECRET_ACCESS_KEY = getenv('AWS_S3_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = getenv('AWS_S3_REGION_NAME')
-    AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400'
-    }
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_LOCATION = 'static'
-    AWS_MEDIA_LOCATION = 'media'
-    AWS_S3_CUSTOM_DOMAIN = getenv('AWS_S3_CUSTOM_DOMAIN')
-    STORAGES = {
-        'default': {'BACKEND': 'custom_storages.CustomS3Boto3Storage'},
-        'staticfiles': {'BACKEND': 'storages.backends.s3boto3.S3StaticStorage'}
-    }
+# locally but see at the end
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# change to whitenoise
+STORAGES = {
+    # ...
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
+#MEDIA_URL = 'media/'
+#MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTHENTICATION_BACKENDS = [
-    
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -199,8 +195,7 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
     'TOKEN_MODEL': None,
-    #'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': getenv('REDIRECT_URLS').split(',')
-
+   
     #'EMAIL': {
     #    'password_reset': 'djoser.email.PasswordResetEmail',
     #},
@@ -215,44 +210,29 @@ AUTH_COOKIE_PATH = '/'
 # AUTH_COOKIE_SAMESITE = 'None'
 AUTH_COOKIE_SAMESITE = 'Lax'
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = getenv('GOOGLE_AUTH_KEY')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = getenv('GOOGLE_AUTH_SECRET_KEY')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-    'openid'
-]
-SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ['first_name', 'last_name']
 
-SOCIAL_AUTH_FACEBOOK_KEY = getenv('FACEBOOK_AUTH_KEY')
-SOCIAL_AUTH_FACEBOOK_SECRET = getenv('FACEBOOK_AUTH_SECRET_KEY')
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-    'fields': 'email, first_name, last_name'
-}
+CSRF_COOKIE_SECURE = getenv('CSRF_COOKIE_SECURE','True') == 'True'
+SESSION_COOKIE_SECURE = getenv('SESSION_COOKIE_SECURE','True') == 'True'
+SECURE_SSL_REDIRECT = getenv('SECURE_SSL_REDIRECT','True') == 'True'
 
-CORS_ALLOWED_ORIGINS = getenv(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000'
-).split(',')
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS=getenv('CORS_ALLOW_CREDENTIALS','True') == 'True'
+# CORS_ALLOWED_ORIGINS=getenv('CORS_ALLOWED_ORIGINS').split(",")
+# CORS_TRUSTED_ORIGINS=getenv('CORS_TRUSTED_ORIGINS').split(",")
+# CORS_ORIGINS_WHITELIST=getenv('CORS_ORIGINS_WHITELIST').split(",")
+CORS_ALLOW_ALL_ORIGINS=getenv('CORS_ALLOW_ALL_ORIGINS','True') == 'True'
+
+#CSRF_TRUSTED_ORIGINS = []
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.ResettingUser'
 
-#######################################################
+# Things we want to attach or overwrite
 
-# them things we want to attach or overwrite in production
-
-#SECURE_SSL_REDIRECT = True
-#ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
-#STATIC_ROOT = env("STATIC_ROOT")
-
-# them things we want to attach or overwrite in dev
-
-# INSTALLED_APPS = INSTALLED_APPS + ["django_extensions"]
+if DEVELOPMENT_MODE is True:
+    INSTALLED_APPS = INSTALLED_APPS + ["django_extensions", "debug_toolbar"]
+else:
+    STATIC_ROOT = getenv("STATIC_ROOT")
 

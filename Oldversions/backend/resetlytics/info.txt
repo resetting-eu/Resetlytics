@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "Assuming (MySql) resetlyticsdb database is up..."
+
+working dir is:
+/backend
+
+echo "Migrating database..."
+python resetlytics/manage.py makemigrations --noinput
+python resetlytics/manage.py migrate --noinput
+echo "Database migrated"
+
+# echo "Collecting static files..."
+# make sure STATIC_ROOT is set properly in the server
+# python resetlytics/manage.py collectstatic --noinput
+# echo "Static files collected"
+
+echo "Starting server with gunicorn ..."
+cd resetlytics
+gunicorn resetlytics.wsgi:application --bind "127.0.0.1:8000" --workers 4
+#gunicorn resetlytics.wsgi:application --bind "194.210.86.20clea:8000" --workers 4

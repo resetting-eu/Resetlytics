@@ -11,6 +11,7 @@ module.exports = {
     // necessary files for a production deployment including select files in node_modules.
     // see https://nextjs.org/docs/pages/api-reference/next-config-js/output
     output: 'standalone', 
+
 };
 
 

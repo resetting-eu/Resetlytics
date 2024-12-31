@@ -1,7 +1,0 @@
-To get the existing database into the docker...
-
-$ mysqldump -u root -p resetlyticsdb > dump_resetlyticsdb.sql
-
-Inside the docker container:
-
-$ mysql -u root -p resetlyticsdb < dump_resetlyticsdb.sql

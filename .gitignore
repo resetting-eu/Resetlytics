@@ -1,7 +1,39 @@
 # Own stuff
 misc-internal/
 misc/
+ssl/
+.env.docker.prod
+dump_resetlytics.db
 
+# Environments
+
+node_modules
+.env.local
+.next
+.DS_Store
+
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+.env.dev
+.env.prod
+.env.prod.db
+static/
+staticfiles/
+
+
+# Logs
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
 # Created by https://www.toptal.com/developers/gitignore/api/django,nextjs
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,nextjs

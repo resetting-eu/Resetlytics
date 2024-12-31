@@ -1,0 +1,24 @@
+
+==== Once =======
+
+Inside the container, to get the existing database...
+
+Considering 
+    - the env variables ${}
+    - the prior command $ mysqldump -u root -p {MYSQL_DATABASE} > dump_resetlyticsdb.sql
+
+# mysql -u root --password=${MYSQL_ROOT_PASSWORD}
+
+mysql> create database {MYSQL_DATABASE};
+mysql> exit
+
+# mysql -u root --password=${MYSQL_ROOT_PASSWORD} {MYSQL_DATABASE} < dump_resetlyticsdb.sql
+
+==== Later on =======
+
+Inside the container, to get things run...
+
+# mysql -u root --password=${MYSQL_ROOT_PASSWORD}
+mysql> use {MYSQL_DATABASE};
+mysql> grant all privileges on test_${MYSQL_DATABASE}.* TO ${MYSQL_USER};
+mysql> exit
