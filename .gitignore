@@ -16,6 +16,8 @@ node_modules
 .vscode/
 .gitignore
 
+
+
 env/
 venv/
 ENV/
